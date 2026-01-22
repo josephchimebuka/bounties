@@ -1,11 +1,12 @@
 "use client"
 
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import type { BountyDetails } from "@/types/bounty"
 import { ExternalLink, Github, Link2, Clock, Calendar, Check } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import { useState } from "react"
+import { cn } from "@/lib/utils"
 
 interface BountySidebarProps {
   bounty: BountyDetails
@@ -14,13 +15,39 @@ interface BountySidebarProps {
 export function BountySidebar({ bounty }: BountySidebarProps) {
   const [copied, setCopied] = useState(false)
 
+  const isClaimable = bounty.status === "open"
+
+  const createdTimeAgo = useMemo(
+    () => formatDistanceToNow(new Date(bounty.createdAt), { addSuffix: true }),
+    [bounty.createdAt]
+  )
+
+  const updatedTimeAgo = useMemo(
+    () => formatDistanceToNow(new Date(bounty.updatedAt), { addSuffix: true }),
+    [bounty.updatedAt]
+  )
+
   const handleCopyLink = async () => {
-    await navigator.clipboard.writeText(window.location.href)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(window.location.href)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    } catch (error) {
+      console.error("Failed to copy link to clipboard:", error)
+    }
   }
 
-  const isClaimable = bounty.status === "open"
+  const claimButtonText = bounty.status === "claimed"
+    ? "Already Claimed"
+    : bounty.status === "closed"
+      ? "Bounty Closed"
+      : "Claim Bounty"
+
+  const claimButtonAriaLabel = !isClaimable
+    ? `Cannot claim: ${claimButtonText}`
+    : "Claim this bounty"
 
   return (
     <div className="sticky top-4 rounded-xl border border-gray-800 bg-background-card p-6 space-y-4">
@@ -32,14 +59,17 @@ export function BountySidebar({ bounty }: BountySidebarProps) {
       </Button>
 
       <Button
-        className={`w-full gap-2 ${
+        className={cn(
+          "w-full gap-2",
           isClaimable
             ? "bg-primary text-primary-foreground hover:bg-primary/90"
             : "bg-gray-800 text-gray-400 cursor-not-allowed"
-        }`}
+        )}
         disabled={!isClaimable}
+        aria-label={claimButtonAriaLabel}
+        title={!isClaimable ? claimButtonText : undefined}
       >
-        {bounty.status === "claimed" ? "Already Claimed" : bounty.status === "closed" ? "Bounty Closed" : "Claim Bounty"}
+        {claimButtonText}
       </Button>
 
       <Separator className="bg-gray-800" />
@@ -71,11 +101,11 @@ export function BountySidebar({ bounty }: BountySidebarProps) {
       <div className="space-y-2 text-sm text-gray-500">
         <div className="flex items-center gap-2">
           <Calendar className="size-4" />
-          <span>Created {formatDistanceToNow(new Date(bounty.createdAt), { addSuffix: true })}</span>
+          <span>Created {createdTimeAgo}</span>
         </div>
         <div className="flex items-center gap-2">
           <Clock className="size-4" />
-          <span>Updated {formatDistanceToNow(new Date(bounty.updatedAt), { addSuffix: true })}</span>
+          <span>Updated {updatedTimeAgo}</span>
         </div>
       </div>
 

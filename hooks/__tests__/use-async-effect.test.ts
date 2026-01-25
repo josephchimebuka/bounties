@@ -29,7 +29,7 @@ describe("useAsyncEffect", () => {
     it("should not run cleanup if component unmounted before effect resolves", async () => {
         // This is hard to deterministicly test without controlled promise resolution,
         // but we can ensure "mounted" check prevents setting cleanup
-        let resolve: any
+        let resolve: (value: void | PromiseLike<void>) => void = () => { }
         const promise = new Promise<void>((r) => (resolve = r))
         const cleanup = jest.fn()
         const effect = jest.fn().mockReturnValue(promise.then(() => cleanup))

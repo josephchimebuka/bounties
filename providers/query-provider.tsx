@@ -2,8 +2,10 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ApolloProvider } from '@apollo/client/react';
 import { useState, type ReactNode } from 'react';
 import { QueryErrorBoundary } from './query-error-boundary';
+import { apolloClient } from '@/lib/graphql/client';
 
 function makeQueryClient(): QueryClient {
   return new QueryClient({
@@ -45,13 +47,15 @@ export function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = useState(getQueryClient);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <QueryErrorBoundary>
-        {children}
-      </QueryErrorBoundary>
-      {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
-      )}
-    </QueryClientProvider>
+    <ApolloProvider client={apolloClient}>
+      <QueryClientProvider client={queryClient}>
+        <QueryErrorBoundary>
+          {children}
+        </QueryErrorBoundary>
+        {process.env.NODE_ENV === 'development' && (
+          <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+        )}
+      </QueryClientProvider>
+    </ApolloProvider>
   );
 }

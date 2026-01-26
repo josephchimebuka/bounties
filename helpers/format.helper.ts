@@ -64,6 +64,7 @@ export function formatText(text: string) {
  * @returns The formatted string
  */
 export function formatAmount(value: number): string {
+  if (Number.isNaN(value)) return "-";
   if (value >= 1000000000) {
     return (value / 1000000000).toString().replace(/\.0$/, "") + "B";
   }
@@ -94,7 +95,7 @@ export function formatPercentage(value: number, decimals: number = 1): string {
  * @returns The formatted file size string
  */
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 Bytes";
+  if (bytes <= 0) return "0 Bytes";
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));

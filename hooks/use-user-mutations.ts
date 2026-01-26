@@ -21,11 +21,11 @@ export interface UpdateUserParams {
 export async function updateUser(params: UpdateUserParams) {
     try {
         const response = await authClient.updateUser(params);
-        
+
         if (!response.data) {
             throw new Error('Failed to update user profile');
         }
-        
+
         return response.data;
     } catch (error) {
         if (error instanceof Error) {
@@ -66,10 +66,10 @@ export function useUpdateUserMutation() {
 
     return useMutation({
         mutationFn: updateUser,
-        onSuccess: (_data: UpdateUserData) => {
+        onSuccess: () => {
             // Invalidate session queries to fetch fresh user data
             queryClient.invalidateQueries({ queryKey: authKeys.session() });
-            
+
             // Show success notification
             toast.success('User updated successfully!');
         },

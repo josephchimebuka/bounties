@@ -100,6 +100,8 @@ export function formatPercentage(value: number, decimals: number = 1): string {
  * @returns The formatted file size string
  */
 export function formatFileSize(bytes: number): string {
+  if (Number.isNaN(bytes)) return "NaN undefined";
+  if (!Number.isFinite(bytes)) return "Infinity undefined";
   if (bytes <= 0) return "0 Bytes";
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
@@ -149,7 +151,7 @@ export function formatDate(
  */
 export function formatDuration(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
-  const total = Math.floor(seconds)
+  const total = Math.floor(seconds);
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = Math.floor(total % 60);

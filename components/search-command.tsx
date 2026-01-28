@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
     FileText,
@@ -147,4 +148,4 @@ export function SearchCommand() {
         </>
     )
 }
-import { useEffect } from "react"
+

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useDebounce } from '@/hooks/use-debounce';
-import { bountiesApi, type Bounty } from '@/lib/api';
+import { bountiesApi } from '@/lib/api';
 import { bountyKeys } from '@/lib/query/query-keys';
 
 const RECENT_SEARCHES_KEY = 'bounties-recent-searches';

@@ -3,13 +3,6 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import {
-    Calculator,
-    Calendar,
-    CreditCard,
-    Settings,
-    Smile,
-    User,
-    Search,
     FileText,
     Clock,
     X
@@ -22,7 +15,6 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-    CommandSeparator,
 } from "@/components/ui/command"
 import { useBountySearch } from "@/hooks/use-bounty-search"
 import { Button } from "@/components/ui/button"

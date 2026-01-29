@@ -53,6 +53,11 @@ export interface Bounty {
   requirements?: string[]
   scope?: string
   milestones?: object[] // Optional milestone definition
+
+  // Participation Lists (User IDs)
+  applicants?: string[]
+  competitors?: string[]
+  members?: string[] // For milestone/collaborative bounties
 }
 
 export type BountyStatus = Bounty['status']

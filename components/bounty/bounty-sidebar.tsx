@@ -47,7 +47,7 @@ export function BountySidebar({ bounty }: BountySidebarProps) {
     }
   }
 
-  const handleAction = async (endpoint: string, body: object = {}) => {
+  const handleAction = async (endpoint: string, body: object = {}): Promise<boolean> => {
     setLoading(true)
     try {
       const res = await fetch(endpoint, {
@@ -88,10 +88,34 @@ export function BountySidebar({ bounty }: BountySidebarProps) {
       )
     }
 
+    // Check participation
+    if (bounty.claimingModel === 'application' && bounty.applicants?.includes(CURRENT_USER_ID)) {
+      return (
+        <Button disabled className="w-full gap-2 bg-gray-800 text-gray-400 cursor-not-allowed">
+          Application Submitted
+        </Button>
+      )
+    }
+
+    if (bounty.claimingModel === 'competition' && bounty.competitors?.includes(CURRENT_USER_ID)) {
+      return (
+        <Button disabled className="w-full gap-2 bg-gray-800 text-gray-400 cursor-not-allowed">
+          Already Joined
+        </Button>
+      )
+    }
+
+    if (bounty.claimingModel === 'milestone' && bounty.members?.includes(CURRENT_USER_ID)) {
+      return (
+        <Button disabled className="w-full gap-2 bg-gray-800 text-gray-400 cursor-not-allowed">
+          Already Joined
+        </Button>
+      )
+    }
+
     if (bounty.claimingModel === 'application') {
       return (
         <ApplicationDialog
-          bountyId={bounty.id}
           bountyTitle={bounty.issueTitle}
           trigger={
             <Button className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">

@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 
 interface ApplicationDialogProps {
-    bountyId: string
     bountyTitle: string
     onApply: (data: { coverLetter: string, portfolioUrl?: string }) => Promise<boolean>
     trigger: React.ReactNode

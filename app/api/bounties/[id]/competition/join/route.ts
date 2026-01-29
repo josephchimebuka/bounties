@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { BountyStore } from '@/lib/store';
 import { CompetitionParticipation } from '@/types/participation';
+import { getCurrentUser } from '@/lib/server-auth';
 
 const generateId = () => crypto.randomUUID();
 
@@ -11,11 +12,9 @@ export async function POST(
     const { id: bountyId } = await params;
 
     try {
-        const body = await request.json();
-        const { contributorId } = body;
-
-        if (!contributorId) {
-            return NextResponse.json({ error: 'Missing contributorId' }, { status: 400 });
+        const user = await getCurrentUser();
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const bounty = BountyStore.getBountyById(bountyId);
@@ -27,8 +26,13 @@ export async function POST(
             return NextResponse.json({ error: 'Invalid claiming model for this action' }, { status: 400 });
         }
 
+        // Validate status is open
+        if (bounty.status !== 'open') {
+            return NextResponse.json({ error: 'Bounty is not open for registration' }, { status: 409 });
+        }
+
         const existing = BountyStore.getCompetitionParticipationsByBounty(bountyId)
-            .find(p => p.contributorId === contributorId);
+            .find(p => p.contributorId === user.id);
 
         if (existing) {
             return NextResponse.json({ error: 'Already joined this competition' }, { status: 409 });
@@ -37,7 +41,7 @@ export async function POST(
         const participation: CompetitionParticipation = {
             id: generateId(),
             bountyId,
-            contributorId,
+            contributorId: user.id, // Use authenticated user ID
             status: 'registered',
             registeredAt: new Date().toISOString()
         };

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { BountyStore } from '@/lib/store';
 import { addDays } from 'date-fns';
+import { getCurrentUser } from '@/lib/server-auth';
 
 export async function POST(
     request: Request,
@@ -9,11 +10,17 @@ export async function POST(
     const { id: bountyId } = await params;
 
     try {
+        const user = await getCurrentUser();
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const { contributorId } = body;
 
-        if (!contributorId) {
-            return NextResponse.json({ error: 'Missing contributorId' }, { status: 400 });
+        // If client sends contributorId, ensure it matches the authenticated user
+        if (contributorId && contributorId !== user.id) {
+            return NextResponse.json({ error: 'Contributor ID mismatch' }, { status: 403 });
         }
 
         const bounty = BountyStore.getBountyById(bountyId);
@@ -32,13 +39,17 @@ export async function POST(
         const now = new Date();
         const updates = {
             status: 'claimed' as const,
-            claimedBy: contributorId,
+            claimedBy: user.id, // Use authenticated user ID
             claimedAt: now.toISOString(),
-            claimExpiresAt: addDays(now, 7).toISOString(), // Default 7 days
+            claimExpiresAt: addDays(now, 7).toISOString(),
             updatedAt: now.toISOString()
         };
 
         const updatedBounty = BountyStore.updateBounty(bountyId, updates);
+
+        if (!updatedBounty) {
+            return NextResponse.json({ success: false, error: 'Failed to update bounty' }, { status: 500 });
+        }
 
         return NextResponse.json({ success: true, data: updatedBounty });
 

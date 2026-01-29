@@ -27,14 +27,27 @@ export async function POST(
             return NextResponse.json({ error: 'Participation not found' }, { status: 404 });
         }
 
+        const bounty = BountyStore.getBountyById(bountyId);
+
         let updates: Partial<typeof participation> = {
             lastUpdatedAt: new Date().toISOString()
         };
 
+        const totalMilestones = (participation as any).totalMilestones || (bounty as any).milestones?.length;
+
         if (action === 'advance') {
+            if (participation.status === 'completed') {
+                return NextResponse.json({ error: 'Cannot advance completed participation' }, { status: 409 });
+            }
+            if (totalMilestones && participation.currentMilestone >= totalMilestones) {
+                return NextResponse.json({ error: 'Already at last milestone' }, { status: 409 });
+            }
             updates.currentMilestone = participation.currentMilestone + 1;
             updates.status = 'advanced';
         } else if (action === 'complete') {
+            if (participation.status === 'completed') {
+                return NextResponse.json({ error: 'Already completed' }, { status: 409 });
+            }
             updates.status = 'completed';
         } else if (action === 'remove') {
             return NextResponse.json({ error: 'Remove action not supported yet' }, { status: 400 });

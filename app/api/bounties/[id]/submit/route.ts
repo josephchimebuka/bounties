@@ -23,6 +23,19 @@ export async function POST(
             return NextResponse.json({ error: 'Bounty not found' }, { status: 404 });
         }
 
+        const allowedModels = ['single-claim', 'competition', 'multi-winner', 'application'];
+        if (!allowedModels.includes(bounty.claimingModel)) {
+            return NextResponse.json({ error: 'Submission not allowed for this bounty type' }, { status: 400 });
+        }
+
+        const existingSubmission = BountyStore.getSubmissionsByBounty(bountyId).find(
+            s => s.contributorId === contributorId
+        );
+
+        if (existingSubmission) {
+            return NextResponse.json({ error: 'Duplicate submission' }, { status: 409 });
+        }
+
         const submission: Submission = {
             id: generateId(),
             bountyId,

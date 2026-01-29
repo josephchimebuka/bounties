@@ -45,6 +45,14 @@ export interface Bounty {
   createdAt: Date;
   updatedAt: Date;
   creator: string;
+
+  // Status & Logic fields
+  claimedAt?: Date;
+  claimedBy?: string;
+  lastActivityAt?: Date;
+  claimExpiresAt?: Date;
+  submissionsEndDate?: Date;
+
   difficulty: "beginner" | "intermediate" | "advanced";
   deadline?: Date;
 }

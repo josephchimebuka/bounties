@@ -4,6 +4,10 @@ import Link from "next/link"
 import { SearchCommand } from "@/components/search-command"
 import { usePathname } from "next/navigation"
 import { NavRankBadge } from "@/components/leaderboard/nav-rank-badge"
+import { WalletSheet } from "@/components/wallet/wallet-sheet"
+import { mockWalletInfo } from "@/lib/mock-wallet"
+import { Button } from "@/components/ui/button"
+import { Wallet } from "lucide-react"
 
 export function GlobalNavbar() {
     const pathname = usePathname()
@@ -34,6 +38,14 @@ export function GlobalNavbar() {
 
                 <div className="flex items-center gap-2">
                     <NavRankBadge userId="user-1" className="hidden sm:flex" /> {/* TODO: Replace with actual auth user ID */}
+                    <WalletSheet
+                        walletInfo={mockWalletInfo}
+                        trigger={
+                            <Button variant="outline" size="icon">
+                                <Wallet className="h-4 w-4" />
+                            </Button>
+                        }
+                    />
                     <SearchCommand />
                 </div>
             </div>

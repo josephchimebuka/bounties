@@ -13,12 +13,12 @@ interface UserRankSidebarProps {
 }
 
 export function UserRankSidebar({ userId }: UserRankSidebarProps) {
-    const { data, isLoading } = useUserRank(userId);
+    const { data, isLoading, error } = useUserRank(userId);
 
     if (!userId) {
         return (
             <Card className="bg-background-card border-border/50">
-                <CardContent className="py-8 text-center text-white">
+                <CardContent className="py-8 text-center text-muted-foreground">
                     <p>Connect your wallet to see your rank</p>
                 </CardContent>
             </Card>
@@ -39,10 +39,21 @@ export function UserRankSidebar({ userId }: UserRankSidebarProps) {
         );
     }
 
+    if (error) {
+        return (
+            <Card className="bg-background-card border-border/50">
+                <CardContent className="py-8 text-center text-destructive">
+                    <p>Failed to load rank</p>
+                    <p className="text-xs mt-2 text-muted-foreground">{(error as Error).message || "Unknown error"}</p>
+                </CardContent>
+            </Card>
+        );
+    }
+
     if (!data) {
         return (
             <Card className="bg-background-card border-border/50">
-                <CardContent className="py-8 text-center text-white">
+                <CardContent className="py-8 text-center text-muted-foreground">
                     Rank not found
                 </CardContent>
             </Card>

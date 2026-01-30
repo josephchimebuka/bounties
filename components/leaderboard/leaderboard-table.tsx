@@ -24,6 +24,7 @@ interface LeaderboardTableProps {
     isFetchingNextPage: boolean;
     onLoadMore: () => void;
     currentUserId?: string;
+    onRowClick?: (entry: LeaderboardEntry) => void;
 }
 
 export function LeaderboardTable({
@@ -33,13 +34,14 @@ export function LeaderboardTable({
     isFetchingNextPage,
     onLoadMore,
     currentUserId,
+    onRowClick,
 }: LeaderboardTableProps) {
     const loadMoreRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && hasNextPage) {
+                if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
                     onLoadMore();
                 }
             },
@@ -53,7 +55,7 @@ export function LeaderboardTable({
         return () => {
             observer.disconnect();
         };
-    }, [hasNextPage, onLoadMore]);
+    }, [hasNextPage, onLoadMore, isFetchingNextPage]);
 
     if (isLoading && entries.length === 0) {
         return (
@@ -65,18 +67,25 @@ export function LeaderboardTable({
         );
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent, entry: LeaderboardEntry) => {
+        if (onRowClick && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            onRowClick(entry);
+        }
+    };
+
     return (
         <div className="rounded-md border border-border/50 overflow-hidden bg-background-card">
             <Table>
                 <TableHeader>
                     <TableRow className="hover:bg-transparent border-b border-border">
-                        <TableHead className="w-[80px] text-center font-bold text-white">RANK</TableHead>
-                        <TableHead className="font-bold text-white">CONTRIBUTOR</TableHead>
-                        <TableHead className="hidden md:table-cell font-bold text-white">TIER</TableHead>
-                        <TableHead className="text-right font-bold text-white">SCORE</TableHead>
-                        <TableHead className="text-right hidden sm:table-cell font-bold text-white">COMPLETED</TableHead>
-                        <TableHead className="text-right hidden lg:table-cell font-bold text-white">EARNINGS</TableHead>
-                        <TableHead className="text-right font-bold text-white">STREAK</TableHead>
+                        <TableHead className="w-[80px] text-center font-bold text-foreground">RANK</TableHead>
+                        <TableHead className="font-bold text-foreground">CONTRIBUTOR</TableHead>
+                        <TableHead className="hidden md:table-cell font-bold text-foreground">TIER</TableHead>
+                        <TableHead className="text-right font-bold text-foreground">SCORE</TableHead>
+                        <TableHead className="text-right hidden sm:table-cell font-bold text-foreground">COMPLETED</TableHead>
+                        <TableHead className="text-right hidden lg:table-cell font-bold text-foreground">EARNINGS</TableHead>
+                        <TableHead className="text-right font-bold text-foreground">STREAK</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -88,8 +97,13 @@ export function LeaderboardTable({
                                 key={entry.contributor.id}
                                 className={cn(
                                     "border-b border-border/60 hover:bg-muted/20",
-                                    isCurrentUser && "bg-secondary/40"
+                                    isCurrentUser && "bg-secondary/40",
+                                    onRowClick && "cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:z-10 relative"
                                 )}
+                                tabIndex={onRowClick ? 0 : undefined}
+                                role={onRowClick ? "row" : undefined}
+                                onClick={onRowClick ? () => onRowClick(entry) : undefined}
+                                onKeyDown={onRowClick ? (e) => handleKeyDown(e, entry) : undefined}
                             >
                                 <TableCell className="text-center font-medium">
                                     <div className="flex justify-center">
@@ -110,9 +124,8 @@ export function LeaderboardTable({
                                             <div className="flex gap-1 md:hidden">
                                                 <span className="text-xs text-muted-foreground">{entry.contributor.tier}</span>
                                             </div>
-                                            {/* Mobile tags */}
                                             <div className="flex gap-1 mt-1 md:hidden">
-                                                {entry.contributor.topTags.slice(0, 1).map(tag => (
+                                                {entry.contributor.topTags.slice(0, 3).map(tag => (
                                                     <span key={tag} className="text-[10px] bg-muted px-1 rounded">{tag}</span>
                                                 ))}
                                             </div>
@@ -120,7 +133,7 @@ export function LeaderboardTable({
                                     </div>
                                     {/* Desktop tags */}
                                     <div className="hidden md:flex gap-1 mt-2">
-                                        {entry.contributor.topTags.map(tag => (
+                                        {entry.contributor.topTags.slice(0, 3).map(tag => (
                                             <Badge key={tag} variant="secondary" className="text-[10px] px-1 h-5 font-normal">
                                                 {tag}
                                             </Badge>

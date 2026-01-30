@@ -40,3 +40,13 @@ export interface MilestoneParticipation {
     lastUpdatedAt: string
     totalMilestones?: number // Optional override or cached value
 }
+
+export type CompetitionStatus = 'registered' | 'qualified' | 'disqualified' | 'winner'
+
+export interface CompetitionParticipation {
+    id: string
+    bountyId: string
+    contributorId: string
+    status: CompetitionStatus
+    registeredAt: string
+}

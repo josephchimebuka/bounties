@@ -49,7 +49,7 @@ export async function POST(
 
         return NextResponse.json({ success: true, data: participation });
 
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

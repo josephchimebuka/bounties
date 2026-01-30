@@ -1,5 +1,5 @@
 import { Bounty } from "@/types/bounty";
-import { Application, Submission, MilestoneParticipation } from "@/types/participation";
+import { Application, Submission, MilestoneParticipation, CompetitionParticipation } from "@/types/participation";
 import { mockBounties } from "./mock-bounty";
 
 class BountyStoreData {
@@ -7,6 +7,7 @@ class BountyStoreData {
     applications: Application[] = [];
     submissions: Submission[] = [];
     milestoneParticipations: MilestoneParticipation[] = [];
+    competitionParticipations: CompetitionParticipation[] = [];
 }
 
 declare global {
@@ -65,5 +66,21 @@ export const BountyStore = {
         if (index === -1) return null;
         globalStore.milestoneParticipations[index] = { ...globalStore.milestoneParticipations[index], ...updates };
         return globalStore.milestoneParticipations[index];
+    },
+
+    // Competitions
+    addCompetitionParticipation: (cp: CompetitionParticipation) => {
+        globalStore.competitionParticipations.push(cp);
+        return cp;
+    },
+    getCompetitionParticipationsByBounty: (bountyId: string) =>
+        globalStore.competitionParticipations.filter((c: CompetitionParticipation) => c.bountyId === bountyId),
+
+    // Generic Bounty Update (for status changes)
+    updateBounty: (bountyId: string, updates: Partial<Bounty>) => {
+        const index = globalStore.bounties.findIndex((b: Bounty) => b.id === bountyId);
+        if (index === -1) return null;
+        globalStore.bounties[index] = { ...globalStore.bounties[index], ...updates };
+        return globalStore.bounties[index];
     }
 };

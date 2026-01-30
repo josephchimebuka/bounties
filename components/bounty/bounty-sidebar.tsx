@@ -4,9 +4,12 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import type { Bounty } from "@/types/bounty"
-import { Github, Link2, Clock, Calendar, Check } from "lucide-react"
+import { Github, Link2, Clock, Calendar, Check, Loader2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import { cn } from "@/lib/utils"
+// import { cn } from "@/lib/utils"
+// import { useRouter } from "next/navigation" // If we need refresh
+import { ApplicationDialog } from "./application-dialog"
+import { toast } from "sonner"
 
 interface BountySidebarProps {
   bounty: Bounty
@@ -14,8 +17,13 @@ interface BountySidebarProps {
 
 export function BountySidebar({ bounty }: BountySidebarProps) {
   const [copied, setCopied] = useState(false)
+  const [loading, setLoading] = useState(false)
+  // const router = useRouter()
 
-  const isClaimable = bounty.status === "open"
+  // Mock user ID for now - in real app this comes from auth context
+  const CURRENT_USER_ID = "mock-user-123"
+
+  // const isClaimable = bounty.status === "open"
 
   const createdTimeAgo = useMemo(
     () => formatDistanceToNow(new Date(bounty.createdAt), { addSuffix: true }),
@@ -39,15 +47,111 @@ export function BountySidebar({ bounty }: BountySidebarProps) {
     }
   }
 
-  const claimButtonText = bounty.status === "claimed"
-    ? "Already Claimed"
-    : bounty.status === "closed"
-      ? "Bounty Closed"
-      : "Claim Bounty"
+  const handleAction = async (endpoint: string, body: object = {}): Promise<boolean> => {
+    setLoading(true)
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contributorId: CURRENT_USER_ID, ...body })
+      })
 
-  const claimButtonAriaLabel = !isClaimable
-    ? `Cannot claim: ${claimButtonText}`
-    : "Claim this bounty"
+      if (!res.ok) {
+        const error = await res.json()
+        alert(error.error || 'Action failed')
+        return false
+      }
+
+      toast('Action completed successfully')
+      window.location.reload()
+      return true
+
+    } catch (error) {
+      console.error('Action error:', error)
+      alert('Something went wrong')
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const renderActionButton = () => {
+    if (bounty.status !== 'open') {
+      const labels: Record<string, string> = {
+        claimed: 'Already Claimed',
+        closed: 'Bounty Closed'
+      }
+      return (
+        <Button disabled className="w-full gap-2 bg-gray-800 text-gray-400 cursor-not-allowed">
+          {labels[bounty.status] || 'Not Available'}
+        </Button>
+      )
+    }
+
+    // Check participation
+    if (bounty.claimingModel === 'application' && bounty.applicants?.includes(CURRENT_USER_ID)) {
+      return (
+        <Button disabled className="w-full gap-2 bg-gray-800 text-gray-400 cursor-not-allowed">
+          Application Submitted
+        </Button>
+      )
+    }
+
+    if (bounty.claimingModel === 'competition' && bounty.competitors?.includes(CURRENT_USER_ID)) {
+      return (
+        <Button disabled className="w-full gap-2 bg-gray-800 text-gray-400 cursor-not-allowed">
+          Already Joined
+        </Button>
+      )
+    }
+
+    if (bounty.claimingModel === 'milestone' && bounty.members?.includes(CURRENT_USER_ID)) {
+      return (
+        <Button disabled className="w-full gap-2 bg-gray-800 text-gray-400 cursor-not-allowed">
+          Already Joined
+        </Button>
+      )
+    }
+
+    if (bounty.claimingModel === 'application') {
+      return (
+        <ApplicationDialog
+          bountyTitle={bounty.issueTitle}
+          trigger={
+            <Button className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+              Apply Now
+            </Button>
+          }
+          onApply={async (data) => {
+            return await handleAction(`/api/bounties/${bounty.id}/apply`, { ...data, applicantId: CURRENT_USER_ID })
+          }}
+        />
+      )
+    }
+
+    let label = 'Claim Bounty'
+    let endpoint = `/api/bounties/${bounty.id}/claim`
+    const body = {}
+
+    if (bounty.claimingModel === 'competition') {
+      label = 'Join Competition'
+      endpoint = `/api/bounties/${bounty.id}/competition/join`
+    } else if (bounty.claimingModel === 'milestone') {
+      label = 'Join Milestone'
+      endpoint = `/api/bounties/${bounty.id}/join`
+    }
+
+    return (
+      <Button
+        onClick={() => handleAction(endpoint, body)}
+        disabled={loading}
+        className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+      >
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {label}
+      </Button>
+    )
+  }
 
   return (
     <div className="sticky top-4 rounded-xl border border-gray-800 bg-background-card p-6 space-y-4">
@@ -58,23 +162,9 @@ export function BountySidebar({ bounty }: BountySidebarProps) {
         </a>
       </Button>
 
-      <Button
-        className={cn(
-          "w-full gap-2",
-          isClaimable
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : "bg-gray-800 text-gray-400 cursor-not-allowed"
-        )}
-        disabled={!isClaimable}
-        aria-label={claimButtonAriaLabel}
-        title={!isClaimable ? claimButtonText : undefined}
-      >
-        {claimButtonText}
-      </Button>
+      {renderActionButton()}
 
       <Separator className="bg-gray-800" />
-
-
 
       <a
         href={`https://github.com/${bounty.githubRepo}`}

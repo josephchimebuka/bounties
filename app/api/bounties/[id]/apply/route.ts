@@ -43,7 +43,7 @@ export async function POST(
         BountyStore.addApplication(application);
 
         return NextResponse.json({ success: true, data: application });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

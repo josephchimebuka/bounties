@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useFieldArray, type UseFormReturn } from "react-hook-form"
-import { Plus, Trash2, GripVertical } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -92,8 +92,7 @@ export function MilestoneBuilder({
             className="border-input relative space-y-3 rounded-lg border p-4"
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
-                <GripVertical className="size-4 cursor-grab" />
+              <div className="text-muted-foreground text-sm font-medium">
                 Milestone {index + 1}
               </div>
               <Button

@@ -19,16 +19,14 @@ export const budgetSchema = z.object({
 export type BudgetValue = z.infer<typeof budgetSchema>
 
 // Schema para DeadlineInput
-export const deadlineSchema = z.object({
-  date: z
-    .date({
-      error: (issue) =>
-        issue.input === undefined
-          ? 'Please select a deadline'
-          : 'Invalid date',
-    })
-    .refine((date) => date > new Date(), 'Deadline must be in the future'),
-})
+export const deadlineSchema = z
+  .date({
+    error: (issue) =>
+      issue.input === undefined
+        ? 'Please select a deadline'
+        : 'Invalid date',
+  })
+  .refine((date) => date > new Date(), 'Deadline must be in the future')
 
 export type DeadlineValue = z.infer<typeof deadlineSchema>
 

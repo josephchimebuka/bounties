@@ -23,13 +23,15 @@ interface MarkdownTextareaProps {
   maxLength?: number
 }
 
+const DEFAULT_MAX_LENGTH = 10000
+
 export function MarkdownTextarea({
   form,
   name,
   label,
   description,
   placeholder,
-  maxLength = 5000,
+  maxLength = DEFAULT_MAX_LENGTH,
 }: MarkdownTextareaProps) {
   const value = form.watch(name) || ""
 

@@ -55,7 +55,10 @@ export function BudgetInput({
                 step="0.01"
                 min="0"
                 {...field}
-                onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                onChange={(e) => {
+                  const parsed = parseFloat(e.target.value)
+                  field.onChange(Number.isNaN(parsed) ? undefined : parsed)
+                }}
               />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}
@@ -72,7 +75,7 @@ export function BudgetInput({
             <FormLabel>Asset</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value as Asset}
+              value={field.value as Asset}
             >
               <FormControl>
                 <SelectTrigger>

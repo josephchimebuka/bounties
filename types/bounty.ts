@@ -52,12 +52,7 @@ export interface Bounty {
   // Let's add them as optional to be safe and backward compatible with existing components.
   requirements?: string[]
   scope?: string
-  milestones?: object[] // Optional milestone definition
-
-  // Participation Lists (User IDs)
-  applicants?: string[]
-  competitors?: string[]
-  members?: string[] // For milestone/collaborative bounties
+  milestones?: unknown[] // Optional milestone definition
 }
 
 export type BountyStatus = Bounty['status']
